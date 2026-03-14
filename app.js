@@ -10,11 +10,16 @@ const appData = {
         totalCandidates: 5,
         electCount: 3,
         crossCount: 2,
-        candidates: [],
+        candidates: [
+            'Trần Thị Phương Anh',
+            'Nguyễn Trần Phương Hà',
+            'Trương Vũ Yến Nhi',
+            'Lê Minh Trí',
+            'Vũ Hồng Văn'
+        ],
         stacks: [{ id: 1, name: 'Xấp 1', ballots: [] }],
         currentStack: 0,
         started: false,
-        // Performance caches
         _voteCounts: null,
         _allBallotsCache: null,
         _ballotsCacheDirty: true,
@@ -25,7 +30,13 @@ const appData = {
         totalCandidates: 5,
         electCount: 3,
         crossCount: 2,
-        candidates: [],
+        candidates: [
+            'Châu Thị Chánh',
+            'Nguyễn Đình Giáp',
+            'Nguyễn Đức Hải',
+            'Nguyễn Văn Phơi',
+            'Trần Hoàng Tâm'
+        ],
         stacks: [{ id: 1, name: 'Xấp 1', ballots: [] }],
         currentStack: 0,
         started: false,
@@ -39,7 +50,16 @@ const appData = {
         totalCandidates: 8,
         electCount: 5,
         crossCount: 3,
-        candidates: [],
+        candidates: [
+            'Nguyễn Thị Ngọc Hòa',
+            'Nguyễn Thị Ngọc Hương',
+            'Lê Thị Kim Khánh',
+            'Nguyễn Hữu Phước',
+            'Lê Gia Quý',
+            'Nguyễn Minh Tân',
+            'Trương Minh Trung',
+            'Nguyễn Vũ Trường'
+        ],
         stacks: [{ id: 1, name: 'Xấp 1', ballots: [] }],
         currentStack: 0,
         started: false,
