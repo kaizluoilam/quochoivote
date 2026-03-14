@@ -859,10 +859,16 @@ function loadFromStorage() {
             ['quochoi', 'tinh', 'phuong'].forEach(level => {
                 if (parsed[level]) {
                     const fields = ['label', 'totalCandidates', 'electCount', 'crossCount',
-                                    'candidates', 'stacks', 'currentStack', 'started'];
+                                    'stacks', 'currentStack', 'started'];
                     fields.forEach(f => {
                         if (parsed[level][f] !== undefined) appData[level][f] = parsed[level][f];
                     });
+                    // Only load saved candidates if the defaults are generic
+                    const defaultsAreGeneric = appData[level].candidates.length === 0
+                        || appData[level].candidates.every((c, i) => c === `Ứng cử viên ${i + 1}`);
+                    if (parsed[level].candidates && defaultsAreGeneric) {
+                        appData[level].candidates = parsed[level].candidates;
+                    }
                 }
             });
         }
