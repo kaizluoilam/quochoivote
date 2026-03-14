@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm Phiếu Bầu Cử Quốc Hội & HĐND</title>
+    <meta name="description" content="Ứng dụng kiểm phiếu bầu cử đại biểu Quốc Hội và HĐND các cấp nhiệm kỳ 2026-2031">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="header-emblem">
+                <svg viewBox="0 0 60 60" width="48" height="48">
+                    <circle cx="30" cy="30" r="28" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+                    <polygon points="30,8 33,22 47,22 36,30 39,44 30,35 21,44 24,30 13,22 27,22" fill="#FFD700" stroke="#FFC107" stroke-width="0.5"/>
+                </svg>
+            </div>
+            <div class="header-text">
+                <h1>KIỂM PHIẾU BẦU CỬ</h1>
+                <p class="header-subtitle">ĐẠI BIỂU QUỐC HỘI & HĐND CÁC CẤP — NHIỆM KỲ 2026 - 2031</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav">
+        <button class="tab-btn active" data-tab="quochoi" id="tab-quochoi">
+            <span class="tab-icon">🏛️</span>
+            <span class="tab-label">Quốc Hội</span>
+        </button>
+        <button class="tab-btn" data-tab="tinh" id="tab-tinh">
+            <span class="tab-icon">🏢</span>
+            <span class="tab-label">HĐND Tỉnh/TP</span>
+        </button>
+        <button class="tab-btn" data-tab="phuong" id="tab-phuong">
+            <span class="tab-icon">🏘️</span>
+            <span class="tab-label">HĐND Phường/Xã</span>
+        </button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- ============ QUỐC HỘI TAB ============ -->
+        <div class="tab-content active" id="content-quochoi">
+            <!-- Config Panel -->
+            <section class="config-panel glass-card">
+                <div class="config-header">
+                    <h2>⚙️ Cấu hình — Bầu cử Đại biểu Quốc Hội</h2>
+                    <button class="btn btn-sm btn-outline" onclick="toggleConfig('quochoi')">
+                        <span id="config-toggle-quochoi">▼ Thu gọn</span>
+                    </button>
+                </div>
+                <div class="config-body" id="config-body-quochoi">
+                    <div class="config-row">
+                        <div class="config-field">
+                            <label>Tổng số ứng cử viên:</label>
+                            <input type="number" id="totalCandidates-quochoi" value="5" min="2" max="20" onchange="updateConfig('quochoi')">
+                        </div>
+                        <div class="config-field">
+                            <label>Số đại biểu được bầu:</label>
+                            <input type="number" id="electCount-quochoi" value="3" min="1" max="19" onchange="updateConfig('quochoi')">
+                        </div>
+                        <div class="config-field">
+                            <label>Số phải gạch đi:</label>
+                            <input type="number" id="crossCount-quochoi" value="2" min="1" readonly disabled class="readonly-field">
+                        </div>
+                    </div>
+                    <div class="candidates-section">
+                        <h3>📋 Danh sách ứng cử viên</h3>
+                        <div class="candidates-list" id="candidates-list-quochoi"></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="startCounting('quochoi')">🚀 BẮT ĐẦU KIỂM PHIẾU</button>
+                </div>
+            </section>
+
+            <!-- Input Panel -->
+            <section class="input-panel glass-card" id="input-panel-quochoi" style="display:none;">
+                <div class="input-header">
+                    <h2>📝 Nhập phiếu — Quốc Hội</h2>
+                    <div class="stack-controls">
+                        <label>Xấp phiếu:</label>
+                        <select id="stack-select-quochoi" onchange="switchStack('quochoi')"></select>
+                        <button class="btn btn-sm btn-success" onclick="addStack('quochoi')">+ Thêm xấp</button>
+                    </div>
+                </div>
+                <div class="input-guide">
+                    <div class="guide-box">
+                        <span class="guide-icon">💡</span>
+                        <div>
+                            <strong>Hướng dẫn:</strong> Nhập <strong>số thứ tự</strong> của người bị gạch, phân cách bằng <strong>dấu phẩy</strong> hoặc <strong>khoảng trắng</strong>. 
+                            Nhấn <strong>Enter</strong> để lưu phiếu và chuyển phiếu tiếp theo. Để trống nếu không gạch ai.
+                        </div>
+                    </div>
+                </div>
+                <div class="input-form">
+                    <div class="input-row">
+                        <span class="ballot-number" id="current-ballot-quochoi">Phiếu #1</span>
+                        <input type="text" class="ballot-input" id="ballot-input-quochoi" 
+                               placeholder="VD: 1, 3 (nhập STT người bị gạch)" 
+                               onkeydown="handleBallotInput(event, 'quochoi')" autofocus>
+                        <button class="btn btn-primary" onclick="submitBallot('quochoi')">Nhập ✓</button>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="btn btn-sm btn-warning" onclick="undoLastBallot('quochoi')">↩️ Hủy phiếu cuối</button>
+                        <button class="btn btn-sm btn-outline" onclick="clearAllBallots('quochoi')">🗑️ Xóa tất cả</button>
+                    </div>
+                </div>
+                <!-- Ballot History -->
+                <div class="ballot-history">
+                    <h3>📜 Lịch sử phiếu đã nhập <span class="badge" id="ballot-count-quochoi">0</span></h3>
+                    <div class="history-table-wrap">
+                        <table class="history-table" id="history-table-quochoi">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Xấp</th>
+                                    <th>Người bị gạch</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="pagination-quochoi"></div>
+                </div>
+            </section>
+
+            <!-- Results Panel -->
+            <section class="results-panel glass-card" id="results-panel-quochoi" style="display:none;">
+                <div class="results-header">
+                    <h2>📊 Kết quả kiểm phiếu — Quốc Hội</h2>
+                    <div class="results-actions">
+                        <button class="btn btn-sm btn-outline" onclick="exportCSV('quochoi')">📥 Xuất CSV</button>
+                        <button class="btn btn-sm btn-outline" onclick="printResults('quochoi')">🖨️ In kết quả</button>
+                    </div>
+                </div>
+                <!-- Stats Cards -->
+                <div class="stats-grid" id="stats-grid-quochoi"></div>
+                <!-- Results Table -->
+                <div class="results-table-wrap">
+                    <table class="results-table" id="results-table-quochoi">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Họ và tên ứng cử viên</th>
+                                <th>Số phiếu bầu</th>
+                                <th>Tỷ lệ</th>
+                                <th>Biểu đồ</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============ TỈNH TAB ============ -->
+        <div class="tab-content" id="content-tinh">
+            <section class="config-panel glass-card">
+                <div class="config-header">
+                    <h2>⚙️ Cấu hình — Bầu cử HĐND Tỉnh/TP</h2>
+                    <button class="btn btn-sm btn-outline" onclick="toggleConfig('tinh')">
+                        <span id="config-toggle-tinh">▼ Thu gọn</span>
+                    </button>
+                </div>
+                <div class="config-body" id="config-body-tinh">
+                    <div class="config-row">
+                        <div class="config-field">
+                            <label>Tổng số ứng cử viên:</label>
+                            <input type="number" id="totalCandidates-tinh" value="5" min="2" max="20" onchange="updateConfig('tinh')">
+                        </div>
+                        <div class="config-field">
+                            <label>Số đại biểu được bầu:</label>
+                            <input type="number" id="electCount-tinh" value="3" min="1" max="19" onchange="updateConfig('tinh')">
+                        </div>
+                        <div class="config-field">
+                            <label>Số phải gạch đi:</label>
+                            <input type="number" id="crossCount-tinh" value="2" min="1" readonly disabled class="readonly-field">
+                        </div>
+                    </div>
+                    <div class="candidates-section">
+                        <h3>📋 Danh sách ứng cử viên</h3>
+                        <div class="candidates-list" id="candidates-list-tinh"></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="startCounting('tinh')">🚀 BẮT ĐẦU KIỂM PHIẾU</button>
+                </div>
+            </section>
+            <section class="input-panel glass-card" id="input-panel-tinh" style="display:none;">
+                <div class="input-header">
+                    <h2>📝 Nhập phiếu — HĐND Tỉnh/TP</h2>
+                    <div class="stack-controls">
+                        <label>Xấp phiếu:</label>
+                        <select id="stack-select-tinh" onchange="switchStack('tinh')"></select>
+                        <button class="btn btn-sm btn-success" onclick="addStack('tinh')">+ Thêm xấp</button>
+                    </div>
+                </div>
+                <div class="input-guide">
+                    <div class="guide-box">
+                        <span class="guide-icon">💡</span>
+                        <div>
+                            <strong>Hướng dẫn:</strong> Nhập <strong>số thứ tự</strong> của người bị gạch, phân cách bằng <strong>dấu phẩy</strong> hoặc <strong>khoảng trắng</strong>. 
+                            Nhấn <strong>Enter</strong> để lưu phiếu và chuyển phiếu tiếp theo. Để trống nếu không gạch ai.
+                        </div>
+                    </div>
+                </div>
+                <div class="input-form">
+                    <div class="input-row">
+                        <span class="ballot-number" id="current-ballot-tinh">Phiếu #1</span>
+                        <input type="text" class="ballot-input" id="ballot-input-tinh" 
+                               placeholder="VD: 2, 4 (nhập STT người bị gạch)" 
+                               onkeydown="handleBallotInput(event, 'tinh')">
+                        <button class="btn btn-primary" onclick="submitBallot('tinh')">Nhập ✓</button>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="btn btn-sm btn-warning" onclick="undoLastBallot('tinh')">↩️ Hủy phiếu cuối</button>
+                        <button class="btn btn-sm btn-outline" onclick="clearAllBallots('tinh')">🗑️ Xóa tất cả</button>
+                    </div>
+                </div>
+                <div class="ballot-history">
+                    <h3>📜 Lịch sử phiếu đã nhập <span class="badge" id="ballot-count-tinh">0</span></h3>
+                    <div class="history-table-wrap">
+                        <table class="history-table" id="history-table-tinh">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Xấp</th>
+                                    <th>Người bị gạch</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="pagination-tinh"></div>
+                </div>
+            </section>
+            <section class="results-panel glass-card" id="results-panel-tinh" style="display:none;">
+                <div class="results-header">
+                    <h2>📊 Kết quả kiểm phiếu — HĐND Tỉnh/TP</h2>
+                    <div class="results-actions">
+                        <button class="btn btn-sm btn-outline" onclick="exportCSV('tinh')">📥 Xuất CSV</button>
+                        <button class="btn btn-sm btn-outline" onclick="printResults('tinh')">🖨️ In kết quả</button>
+                    </div>
+                </div>
+                <div class="stats-grid" id="stats-grid-tinh"></div>
+                <div class="results-table-wrap">
+                    <table class="results-table" id="results-table-tinh">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Họ và tên ứng cử viên</th>
+                                <th>Số phiếu bầu</th>
+                                <th>Tỷ lệ</th>
+                                <th>Biểu đồ</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============ PHƯỜNG TAB ============ -->
+        <div class="tab-content" id="content-phuong">
+            <section class="config-panel glass-card">
+                <div class="config-header">
+                    <h2>⚙️ Cấu hình — Bầu cử HĐND Phường/Xã</h2>
+                    <button class="btn btn-sm btn-outline" onclick="toggleConfig('phuong')">
+                        <span id="config-toggle-phuong">▼ Thu gọn</span>
+                    </button>
+                </div>
+                <div class="config-body" id="config-body-phuong">
+                    <div class="config-row">
+                        <div class="config-field">
+                            <label>Tổng số ứng cử viên:</label>
+                            <input type="number" id="totalCandidates-phuong" value="8" min="2" max="20" onchange="updateConfig('phuong')">
+                        </div>
+                        <div class="config-field">
+                            <label>Số đại biểu được bầu:</label>
+                            <input type="number" id="electCount-phuong" value="5" min="1" max="19" onchange="updateConfig('phuong')">
+                        </div>
+                        <div class="config-field">
+                            <label>Số phải gạch đi:</label>
+                            <input type="number" id="crossCount-phuong" value="3" min="1" readonly disabled class="readonly-field">
+                        </div>
+                    </div>
+                    <div class="candidates-section">
+                        <h3>📋 Danh sách ứng cử viên</h3>
+                        <div class="candidates-list" id="candidates-list-phuong"></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="startCounting('phuong')">🚀 BẮT ĐẦU KIỂM PHIẾU</button>
+                </div>
+            </section>
+            <section class="input-panel glass-card" id="input-panel-phuong" style="display:none;">
+                <div class="input-header">
+                    <h2>📝 Nhập phiếu — HĐND Phường/Xã</h2>
+                    <div class="stack-controls">
+                        <label>Xấp phiếu:</label>
+                        <select id="stack-select-phuong" onchange="switchStack('phuong')"></select>
+                        <button class="btn btn-sm btn-success" onclick="addStack('phuong')">+ Thêm xấp</button>
+                    </div>
+                </div>
+                <div class="input-guide">
+                    <div class="guide-box">
+                        <span class="guide-icon">💡</span>
+                        <div>
+                            <strong>Hướng dẫn:</strong> Nhập <strong>số thứ tự</strong> của người bị gạch, phân cách bằng <strong>dấu phẩy</strong> hoặc <strong>khoảng trắng</strong>. 
+                            Nhấn <strong>Enter</strong> để lưu phiếu và chuyển phiếu tiếp theo. Để trống nếu không gạch ai.
+                        </div>
+                    </div>
+                </div>
+                <div class="input-form">
+                    <div class="input-row">
+                        <span class="ballot-number" id="current-ballot-phuong">Phiếu #1</span>
+                        <input type="text" class="ballot-input" id="ballot-input-phuong" 
+                               placeholder="VD: 2, 5, 7 (nhập STT người bị gạch)" 
+                               onkeydown="handleBallotInput(event, 'phuong')">
+                        <button class="btn btn-primary" onclick="submitBallot('phuong')">Nhập ✓</button>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="btn btn-sm btn-warning" onclick="undoLastBallot('phuong')">↩️ Hủy phiếu cuối</button>
+                        <button class="btn btn-sm btn-outline" onclick="clearAllBallots('phuong')">🗑️ Xóa tất cả</button>
+                    </div>
+                </div>
+                <div class="ballot-history">
+                    <h3>📜 Lịch sử phiếu đã nhập <span class="badge" id="ballot-count-phuong">0</span></h3>
+                    <div class="history-table-wrap">
+                        <table class="history-table" id="history-table-phuong">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Xấp</th>
+                                    <th>Người bị gạch</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="pagination-phuong"></div>
+                </div>
+            </section>
+            <section class="results-panel glass-card" id="results-panel-phuong" style="display:none;">
+                <div class="results-header">
+                    <h2>📊 Kết quả kiểm phiếu — HĐND Phường/Xã</h2>
+                    <div class="results-actions">
+                        <button class="btn btn-sm btn-outline" onclick="exportCSV('phuong')">📥 Xuất CSV</button>
+                        <button class="btn btn-sm btn-outline" onclick="printResults('phuong')">🖨️ In kết quả</button>
+                    </div>
+                </div>
+                <div class="stats-grid" id="stats-grid-phuong"></div>
+                <div class="results-table-wrap">
+                    <table class="results-table" id="results-table-phuong">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Họ và tên ứng cử viên</th>
+                                <th>Số phiếu bầu</th>
+                                <th>Tỷ lệ</th>
+                                <th>Biểu đồ</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Supabase Connection Panel -->
+    <div class="supabase-panel glass-card" id="supabase-panel">
+        <div class="supabase-header" onclick="toggleSupabasePanel()">
+            <h3>☁️ Kết nối Supabase <span class="connection-status" id="supabase-status">Chưa kết nối</span></h3>
+        </div>
+        <div class="supabase-body" id="supabase-body" style="display:none;">
+            <div class="config-row" style="grid-template-columns: 1fr 1fr;">
+                <div class="config-field">
+                    <label>Supabase URL:</label>
+                    <input type="text" id="supabase-url" placeholder="https://xxxxx.supabase.co">
+                </div>
+                <div class="config-field">
+                    <label>Anon Key:</label>
+                    <input type="text" id="supabase-key" placeholder="eyJhbGciOiJ...">
+                </div>
+            </div>
+            <div class="supabase-actions">
+                <button class="btn btn-primary" onclick="connectSupabase()">🔗 Kết nối</button>
+                <button class="btn btn-sm btn-outline" onclick="disconnectSupabase()">Ngắt kết nối</button>
+                <button class="btn btn-sm btn-success" onclick="syncToSupabase()" id="btn-sync" style="display:none;">🔄 Đồng bộ tất cả</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>Ứng dụng Kiểm Phiếu Bầu Cử — Nhiệm kỳ 2026 - 2031</p>
+    </footer>
+
+    <script src="supabase.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
