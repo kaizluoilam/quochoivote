@@ -658,6 +658,128 @@ function exportCSV(level) {
     showToast('Đã xuất file CSV!', 'success');
 }
 
+// ============ EXPORT EXCEL ============
+function exportExcel(level) {
+    const data = appData[level];
+    const allBallots = getAllBallotsCached(level);
+    if (allBallots.length === 0) { showToast('Chưa có phiếu nào để xuất!', 'warning'); return; }
+
+    if (typeof XLSX === 'undefined') {
+        showToast('❌ Đang tải thư viện Excel, vui lòng thử lại sau 3 giây...', 'warning');
+        return;
+    }
+
+    const vc = data._voteCounts;
+    const countable = vc.valid + vc.none;
+    const today = new Date().toLocaleDateString('vi-VN');
+
+    // ====== SHEET 1: Kết quả tổng hợp ======
+    const sheet1Data = [];
+
+    // Header rows
+    sheet1Data.push(['CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM']);
+    sheet1Data.push(['Độc lập - Tự do - Hạnh phúc']);
+    sheet1Data.push([]);
+    sheet1Data.push([`BIÊN BẢN KIỂM PHIẾU BẦU CỬ ${data.label.toUpperCase()}`]);
+    sheet1Data.push([`Nhiệm kỳ 2026 - 2031`]);
+    sheet1Data.push([`Ngày lập: ${today}`]);
+    sheet1Data.push([]);
+
+    // Summary stats
+    sheet1Data.push(['THỐNG KÊ TỔNG HỢP']);
+    sheet1Data.push(['Tổng số phiếu phát ra', vc.total]);
+    sheet1Data.push(['Tổng số phiếu thu về', vc.total]);
+    sheet1Data.push(['Số phiếu hợp lệ', countable]);
+    sheet1Data.push(['Số phiếu không hợp lệ', vc.invalid]);
+    sheet1Data.push(['Số phiếu bầu đủ (không gạch)', vc.none]);
+    sheet1Data.push([]);
+
+    // Candidate results
+    sheet1Data.push(['KẾT QUẢ KIỂM PHIẾU']);
+    sheet1Data.push(['STT', 'Họ và tên ứng cử viên', 'Số phiếu bầu', 'Tỷ lệ (%)', 'Kết quả']);
+
+    const candidateResults = data.candidates.map((name, idx) => ({
+        stt: idx + 1, name,
+        votes: vc.perCandidate[idx] || 0,
+        percent: countable > 0 ? ((vc.perCandidate[idx] / countable) * 100).toFixed(1) : '0.0'
+    }));
+    const sorted = [...candidateResults].sort((a, b) => b.votes - a.votes);
+    const electedStt = new Set();
+    sorted.slice(0, data.electCount).forEach(c => { if (c.votes > 0) electedStt.add(c.stt); });
+
+    candidateResults.forEach(c => {
+        sheet1Data.push([
+            c.stt,
+            c.name,
+            c.votes,
+            parseFloat(c.percent),
+            electedStt.has(c.stt) ? 'TRÚNG CỬ' : ''
+        ]);
+    });
+
+    sheet1Data.push([]);
+    sheet1Data.push(['', '', '', '', `Ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}`]);
+    sheet1Data.push(['TỔ TRƯỞNG TỔ BẦU CỬ', '', '', '', 'THƯ KÝ']);
+
+    const ws1 = XLSX.utils.aoa_to_sheet(sheet1Data);
+
+    // Set column widths
+    ws1['!cols'] = [
+        { wch: 6 },   // STT
+        { wch: 35 },  // Tên
+        { wch: 16 },  // Số phiếu
+        { wch: 12 },  // Tỷ lệ
+        { wch: 18 }   // Kết quả
+    ];
+
+    // Merge cells for headers
+    ws1['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } },  // Cộng hòa...
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 4 } },  // Độc lập...
+        { s: { r: 3, c: 0 }, e: { r: 3, c: 4 } },  // Biên bản...
+        { s: { r: 4, c: 0 }, e: { r: 4, c: 4 } },  // Nhiệm kỳ...
+        { s: { r: 5, c: 0 }, e: { r: 5, c: 4 } },  // Ngày lập...
+        { s: { r: 7, c: 0 }, e: { r: 7, c: 4 } },  // Thống kê...
+    ];
+
+    // ====== SHEET 2: Chi tiết phiếu ======
+    const sheet2Data = [];
+    sheet2Data.push([`CHI TIẾT PHIẾU BẦU — ${data.label.toUpperCase()}`]);
+    sheet2Data.push([]);
+    sheet2Data.push(['STT Phiếu', 'Xấp', 'Người bị gạch (STT)', 'Tên người bị gạch', 'Trạng thái']);
+
+    allBallots.forEach(b => {
+        const stackName = data.stacks.find(s => s.id === b.stackId)?.name || '?';
+        const crossedSTT = b.crossedOut.length > 0 ? b.crossedOut.join(', ') : 'Không gạch';
+        const crossedNames = b.crossedOut.length > 0
+            ? b.crossedOut.map(n => data.candidates[n - 1] || '?').join(', ')
+            : 'Không gạch ai';
+        const status = b.status === 'valid' ? 'Hợp lệ' : b.status === 'none' ? 'Bầu đủ' : 'Không hợp lệ';
+        sheet2Data.push([b.number, stackName, crossedSTT, crossedNames, status]);
+    });
+
+    const ws2 = XLSX.utils.aoa_to_sheet(sheet2Data);
+    ws2['!cols'] = [
+        { wch: 10 },  // STT
+        { wch: 10 },  // Xấp
+        { wch: 22 },  // STT gạch
+        { wch: 40 },  // Tên gạch
+        { wch: 16 }   // Trạng thái
+    ];
+    ws2['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 4 } }
+    ];
+
+    // ====== Create workbook ======
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws1, 'Kết quả');
+    XLSX.utils.book_append_sheet(wb, ws2, 'Chi tiết phiếu');
+
+    const fileName = `bao-cao-kiem-phieu-${level}-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    showToast(`✓ Đã xuất file Excel: ${fileName}`, 'success');
+}
+
 // ============ PRINT ============
 function printResults(level) {
     document.querySelectorAll('.results-panel').forEach(p => p.style.display = 'none');

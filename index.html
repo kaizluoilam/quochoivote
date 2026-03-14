@@ -136,6 +136,7 @@
                 <div class="results-header">
                     <h2>📊 Kết quả kiểm phiếu — Quốc Hội</h2>
                     <div class="results-actions">
+                        <button class="btn btn-sm btn-outline" onclick="exportExcel('quochoi')">📊 Xuất Excel</button>
                         <button class="btn btn-sm btn-outline" onclick="exportCSV('quochoi')">📥 Xuất CSV</button>
                         <button class="btn btn-sm btn-outline" onclick="printResults('quochoi')">🖨️ In kết quả</button>
                     </div>
@@ -245,6 +246,7 @@
                 <div class="results-header">
                     <h2>📊 Kết quả kiểm phiếu — HĐND Tỉnh/TP</h2>
                     <div class="results-actions">
+                        <button class="btn btn-sm btn-outline" onclick="exportExcel('tinh')">📊 Xuất Excel</button>
                         <button class="btn btn-sm btn-outline" onclick="exportCSV('tinh')">📥 Xuất CSV</button>
                         <button class="btn btn-sm btn-outline" onclick="printResults('tinh')">🖨️ In kết quả</button>
                     </div>
@@ -352,6 +354,7 @@
                 <div class="results-header">
                     <h2>📊 Kết quả kiểm phiếu — HĐND Phường/Xã</h2>
                     <div class="results-actions">
+                        <button class="btn btn-sm btn-outline" onclick="exportExcel('phuong')">📊 Xuất Excel</button>
                         <button class="btn btn-sm btn-outline" onclick="exportCSV('phuong')">📥 Xuất CSV</button>
                         <button class="btn btn-sm btn-outline" onclick="printResults('phuong')">🖨️ In kết quả</button>
                     </div>
@@ -407,6 +410,7 @@
         <p>Ứng dụng Kiểm Phiếu Bầu Cử — Nhiệm kỳ 2026 - 2031</p>
     </footer>
 
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <script src="supabase.js"></script>
     <script src="app.js"></script>
 </body>
