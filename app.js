@@ -337,7 +337,15 @@ function submitBallot(level) {
         crossedOut = [];
         status = 'none';
     } else {
-        const parts = rawValue.split(/[\s,;.]+/).filter(p => p.length > 0);
+        let parts;
+        // If input has separators (comma, space, semicolon), split normally
+        if (/[\s,;.]/.test(rawValue)) {
+            parts = rawValue.split(/[\s,;.]+/).filter(p => p.length > 0);
+        } else {
+            // No separators: split each character as individual digit
+            // e.g. "13" -> ["1", "3"], "245" -> ["2", "4", "5"]
+            parts = rawValue.split('').filter(p => p.length > 0);
+        }
         crossedOut = parts.map(p => parseInt(p)).filter(n => !isNaN(n));
 
         const unique = [...new Set(crossedOut)];
@@ -710,14 +718,34 @@ function updateResultsFromCache(level) {
 // ============ EXPORT CSV ============
 function exportCSV(level) {
     const data = appData[level];
-    const allBallots = getAllBallotsCached(level);
-    if (allBallots.length === 0) { showToast('Chưa có phiếu nào để xuất!', 'warning'); return; }
+    const select = document.getElementById(`stack-filter-${level}`);
+    const filterVal = select ? select.value : 'all';
 
-    const vc = data._voteCounts;
+    let vc, ballots, filterLabel;
+
+    if (filterVal === 'all') {
+        ballots = getAllBallotsCached(level);
+        if (!data._voteCounts) rebuildVoteCounts(level);
+        vc = data._voteCounts;
+        filterLabel = '';
+    } else {
+        const stackIdx = parseInt(filterVal);
+        const stack = data.stacks[stackIdx];
+        if (!stack || stack.ballots.length === 0) {
+            showToast('Xấp này chưa có phiếu nào!', 'warning');
+            return;
+        }
+        ballots = stack.ballots;
+        vc = calculateVotesForBallots(stack.ballots, data.totalCandidates);
+        filterLabel = ` - ${stack.name}`;
+    }
+
+    if (ballots.length === 0) { showToast('Chưa có phiếu nào để xuất!', 'warning'); return; }
+
     const countable = vc.valid + vc.none;
 
     let csv = '\uFEFF';
-    csv += `Kết quả kiểm phiếu ${data.label} - Nhiệm kỳ 2026-2031\n\n`;
+    csv += `Kết quả kiểm phiếu ${data.label}${filterLabel} - Nhiệm kỳ 2026-2031\n\n`;
     csv += `Tổng số phiếu,${vc.total}\nPhiếu hợp lệ,${countable}\nPhiếu không hợp lệ,${vc.invalid}\n\n`;
     csv += 'STT,Họ và tên,Số phiếu bầu,Tỷ lệ\n';
 
@@ -728,7 +756,7 @@ function exportCSV(level) {
     });
 
     csv += '\n--- Chi tiết phiếu ---\nSTT Phiếu,Xấp,Người bị gạch,Trạng thái\n';
-    allBallots.forEach(b => {
+    ballots.forEach(b => {
         const stackName = data.stacks.find(s => s.id === b.stackId)?.name || '?';
         const crossed = b.crossedOut.length > 0 ? b.crossedOut.join(' ') : 'Không gạch';
         const status = b.status === 'valid' ? 'Hợp lệ' : b.status === 'none' ? 'Bầu đủ' : 'Không hợp lệ';
