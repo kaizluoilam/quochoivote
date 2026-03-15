@@ -67,7 +67,7 @@
                         </div>
                         <div class="config-field">
                             <label>Số phải gạch đi:</label>
-                            <input type="number" id="crossCount-quochoi" value="2" min="1" readonly disabled class="readonly-field">
+                            <input type="number" id="crossCount-quochoi" value="2" min="0" max="19" onchange="updateConfig('quochoi')">
                         </div>
                     </div>
                     <div class="candidates-section">
@@ -198,7 +198,7 @@
                         </div>
                         <div class="config-field">
                             <label>Số phải gạch đi:</label>
-                            <input type="number" id="crossCount-tinh" value="2" min="1" readonly disabled class="readonly-field">
+                            <input type="number" id="crossCount-tinh" value="2" min="0" max="19" onchange="updateConfig('tinh')">
                         </div>
                     </div>
                     <div class="candidates-section">
@@ -322,7 +322,7 @@
                         </div>
                         <div class="config-field">
                             <label>Số phải gạch đi:</label>
-                            <input type="number" id="crossCount-phuong" value="3" min="1" readonly disabled class="readonly-field">
+                            <input type="number" id="crossCount-phuong" value="3" min="0" max="19" onchange="updateConfig('phuong')">
                         </div>
                     </div>
                     <div class="candidates-section">

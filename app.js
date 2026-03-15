@@ -108,14 +108,17 @@ function updateConfig(level) {
 
     data.totalCandidates = parseInt(totalEl.value) || 2;
     data.electCount = parseInt(electEl.value) || 1;
+    data.crossCount = parseInt(crossEl.value) || 0;
 
     if (data.electCount >= data.totalCandidates) {
         data.electCount = data.totalCandidates - 1;
         electEl.value = data.electCount;
     }
 
-    data.crossCount = data.totalCandidates - data.electCount;
-    crossEl.value = data.crossCount;
+    if (data.crossCount >= data.totalCandidates) {
+        data.crossCount = data.totalCandidates - 1;
+        crossEl.value = data.crossCount;
+    }
 
     data._voteCounts = null;
     initCandidatesList(level);
@@ -360,7 +363,8 @@ function submitBallot(level) {
             return;
         }
 
-        if (crossedOut.length !== data.crossCount) {
+        // Only invalid when crossing ALL candidates
+        if (crossedOut.length === data.totalCandidates) {
             status = 'invalid';
         }
     }
@@ -453,7 +457,8 @@ function parseBallotLine(rawValue, totalCandidates, crossCount) {
         return { error: `STT ngoài [1-${totalCandidates}]` };
     }
 
-    if (crossedOut.length !== crossCount) {
+    // Only invalid when crossing ALL candidates
+    if (crossedOut.length === totalCandidates) {
         status = 'invalid';
     }
 
