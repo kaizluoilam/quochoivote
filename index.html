@@ -101,13 +101,27 @@
                     <div class="input-row">
                         <span class="ballot-number" id="current-ballot-quochoi">Phiếu #1</span>
                         <input type="text" class="ballot-input" id="ballot-input-quochoi" 
-                               placeholder="VD: 1, 3 (nhập STT người bị gạch)" 
+                               placeholder="VD: 13 hoặc 1,3 (nhập STT người bị gạch)" 
                                onkeydown="handleBallotInput(event, 'quochoi')" autofocus>
                         <button class="btn btn-primary" onclick="submitBallot('quochoi')">Nhập ✓</button>
                     </div>
                     <div class="quick-actions">
                         <button class="btn btn-sm btn-warning" onclick="undoLastBallot('quochoi')">↩️ Hủy phiếu cuối</button>
                         <button class="btn btn-sm btn-outline" onclick="clearAllBallots('quochoi')">🗑️ Xóa tất cả</button>
+                        <button class="btn btn-sm btn-outline" onclick="toggleBulkInput('quochoi')" id="bulk-toggle-quochoi">⚡ Nhập hàng loạt</button>
+                    </div>
+                    <div class="bulk-input-panel" id="bulk-panel-quochoi" style="display:none;">
+                        <textarea class="bulk-textarea" id="bulk-input-quochoi" rows="8" 
+                                  placeholder="Mỗi dòng 1 phiếu, ví dụ:
+13
+25
+14
+
+(dòng trống = bầu đủ)"></textarea>
+                        <div class="bulk-actions">
+                            <button class="btn btn-primary" onclick="submitBulkBallots('quochoi')">📨 Nhập tất cả</button>
+                            <span class="bulk-count" id="bulk-count-quochoi">0 dòng</span>
+                        </div>
                     </div>
                 </div>
                 <!-- Ballot History -->
@@ -216,13 +230,27 @@
                     <div class="input-row">
                         <span class="ballot-number" id="current-ballot-tinh">Phiếu #1</span>
                         <input type="text" class="ballot-input" id="ballot-input-tinh" 
-                               placeholder="VD: 2, 4 (nhập STT người bị gạch)" 
+                               placeholder="VD: 24 hoặc 2,4 (nhập STT người bị gạch)" 
                                onkeydown="handleBallotInput(event, 'tinh')">
                         <button class="btn btn-primary" onclick="submitBallot('tinh')">Nhập ✓</button>
                     </div>
                     <div class="quick-actions">
                         <button class="btn btn-sm btn-warning" onclick="undoLastBallot('tinh')">↩️ Hủy phiếu cuối</button>
                         <button class="btn btn-sm btn-outline" onclick="clearAllBallots('tinh')">🗑️ Xóa tất cả</button>
+                        <button class="btn btn-sm btn-outline" onclick="toggleBulkInput('tinh')" id="bulk-toggle-tinh">⚡ Nhập hàng loạt</button>
+                    </div>
+                    <div class="bulk-input-panel" id="bulk-panel-tinh" style="display:none;">
+                        <textarea class="bulk-textarea" id="bulk-input-tinh" rows="8" 
+                                  placeholder="Mỗi dòng 1 phiếu, ví dụ:
+24
+13
+35
+
+(dòng trống = bầu đủ)"></textarea>
+                        <div class="bulk-actions">
+                            <button class="btn btn-primary" onclick="submitBulkBallots('tinh')">📨 Nhập tất cả</button>
+                            <span class="bulk-count" id="bulk-count-tinh">0 dòng</span>
+                        </div>
                     </div>
                 </div>
                 <div class="ballot-history">
@@ -326,13 +354,27 @@
                     <div class="input-row">
                         <span class="ballot-number" id="current-ballot-phuong">Phiếu #1</span>
                         <input type="text" class="ballot-input" id="ballot-input-phuong" 
-                               placeholder="VD: 2, 5, 7 (nhập STT người bị gạch)" 
+                               placeholder="VD: 257 hoặc 2,5,7 (nhập STT người bị gạch)" 
                                onkeydown="handleBallotInput(event, 'phuong')">
                         <button class="btn btn-primary" onclick="submitBallot('phuong')">Nhập ✓</button>
                     </div>
                     <div class="quick-actions">
                         <button class="btn btn-sm btn-warning" onclick="undoLastBallot('phuong')">↩️ Hủy phiếu cuối</button>
                         <button class="btn btn-sm btn-outline" onclick="clearAllBallots('phuong')">🗑️ Xóa tất cả</button>
+                        <button class="btn btn-sm btn-outline" onclick="toggleBulkInput('phuong')" id="bulk-toggle-phuong">⚡ Nhập hàng loạt</button>
+                    </div>
+                    <div class="bulk-input-panel" id="bulk-panel-phuong" style="display:none;">
+                        <textarea class="bulk-textarea" id="bulk-input-phuong" rows="8" 
+                                  placeholder="Mỗi dòng 1 phiếu, ví dụ:
+257
+138
+246
+
+(dòng trống = bầu đủ)"></textarea>
+                        <div class="bulk-actions">
+                            <button class="btn btn-primary" onclick="submitBulkBallots('phuong')">📨 Nhập tất cả</button>
+                            <span class="bulk-count" id="bulk-count-phuong">0 dòng</span>
+                        </div>
                     </div>
                 </div>
                 <div class="ballot-history">

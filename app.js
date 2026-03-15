@@ -404,6 +404,125 @@ function submitBallot(level) {
     }
 }
 
+// ============ BULK INPUT ============
+function toggleBulkInput(level) {
+    const panel = document.getElementById(`bulk-panel-${level}`);
+    const btn = document.getElementById(`bulk-toggle-${level}`);
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        btn.textContent = '✏️ Nhập từng phiếu';
+        const textarea = document.getElementById(`bulk-input-${level}`);
+        textarea.addEventListener('input', () => updateBulkCount(level));
+        textarea.focus();
+    } else {
+        panel.style.display = 'none';
+        btn.textContent = '⚡ Nhập hàng loạt';
+    }
+}
+
+function updateBulkCount(level) {
+    const textarea = document.getElementById(`bulk-input-${level}`);
+    const lines = textarea.value.split('\n').filter(l => l.trim() !== '' || l === '');
+    const count = textarea.value.trim() === '' ? 0 : textarea.value.split('\n').length;
+    document.getElementById(`bulk-count-${level}`).textContent = `${count} dòng`;
+}
+
+function parseBallotLine(rawValue, totalCandidates, crossCount) {
+    let crossedOut = [];
+    let status = 'valid';
+
+    if (rawValue === '') {
+        return { crossedOut: [], status: 'none' };
+    }
+
+    let parts;
+    if (/[\s,;.]/.test(rawValue)) {
+        parts = rawValue.split(/[\s,;.]+/).filter(p => p.length > 0);
+    } else {
+        parts = rawValue.split('').filter(p => p.length > 0);
+    }
+    crossedOut = parts.map(p => parseInt(p)).filter(n => !isNaN(n));
+
+    const unique = [...new Set(crossedOut)];
+    if (unique.length !== crossedOut.length) {
+        return { error: 'trùng STT' };
+    }
+    crossedOut = unique;
+
+    if (crossedOut.some(n => n < 1 || n > totalCandidates)) {
+        return { error: `STT ngoài [1-${totalCandidates}]` };
+    }
+
+    if (crossedOut.length !== crossCount) {
+        status = 'invalid';
+    }
+
+    return { crossedOut, status };
+}
+
+function submitBulkBallots(level) {
+    const data = appData[level];
+    const textarea = document.getElementById(`bulk-input-${level}`);
+    const lines = textarea.value.split('\n');
+
+    if (lines.length === 0 || (lines.length === 1 && lines[0].trim() === '')) {
+        showToast('Chưa có dữ liệu để nhập!', 'warning');
+        return;
+    }
+
+    let stackIdx = data.currentStack;
+    if (stackIdx < 0) stackIdx = 0;
+    if (stackIdx >= data.stacks.length) stackIdx = data.stacks.length - 1;
+
+    let successCount = 0;
+    let errorLines = [];
+
+    lines.forEach((line, lineIdx) => {
+        const rawValue = line.trim();
+        const result = parseBallotLine(rawValue, data.totalCandidates, data.crossCount);
+
+        if (result.error) {
+            errorLines.push(`Dòng ${lineIdx + 1}: ${result.error}`);
+            return;
+        }
+
+        const ballotNumber = getAllBallotsCached(level).length + 1;
+        const ballot = {
+            id: Date.now() + lineIdx,
+            number: ballotNumber,
+            crossedOut: result.crossedOut,
+            status: result.status,
+            stackId: data.stacks[stackIdx].id
+        };
+
+        data.stacks[stackIdx].ballots.push(ballot);
+        invalidateBallotCache(level);
+        addBallotToCache(level, ballot);
+        successCount++;
+    });
+
+    // Update UI once after all ballots
+    updateBallotCounter(level);
+    updateStackSelect(level);
+    data._historyPage = 1;
+    renderBallotHistory(level);
+    updateResultsFromCache(level);
+    debouncedSave();
+
+    textarea.value = '';
+    updateBulkCount(level);
+
+    if (typeof supabaseSync !== 'undefined' && supabaseSync.isConnected()) {
+        supabaseSync.syncAll();
+    }
+
+    if (errorLines.length > 0) {
+        showToast(`✓ Đã nhập ${successCount} phiếu, ${errorLines.length} lỗi: ${errorLines[0]}`, 'warning');
+    } else {
+        showToast(`✓ Đã nhập hàng loạt ${successCount} phiếu thành công!`, 'success');
+    }
+}
+
 function undoLastBallot(level) {
     const data = appData[level];
     let stackIdx = data.currentStack;
