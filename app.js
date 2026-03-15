@@ -597,14 +597,74 @@ function updateResults(level) {
     updateResultsFromCache(level);
 }
 
-function updateResultsFromCache(level) {
+function updateStackFilterOptions(level) {
     const data = appData[level];
-    if (!data._voteCounts) rebuildVoteCounts(level);
-    const vc = data._voteCounts;
+    const select = document.getElementById(`stack-filter-${level}`);
+    if (!select) return;
+    const currentVal = select.value;
+    select.innerHTML = '<option value="all">📦 Tất cả xấp</option>';
+    data.stacks.forEach((stack, idx) => {
+        const count = stack.ballots.length;
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = `${stack.name} (${count} phiếu)`;
+        select.appendChild(opt);
+    });
+    // Restore selection if still valid
+    if (currentVal !== 'all' && parseInt(currentVal) < data.stacks.length) {
+        select.value = currentVal;
+    } else {
+        select.value = 'all';
+    }
+}
+
+function filterResultsByStack(level) {
+    renderResultsForFilter(level);
+}
+
+function calculateVotesForBallots(ballots, totalCandidates) {
+    const vc = { total: 0, valid: 0, invalid: 0, none: 0, perCandidate: new Array(totalCandidates).fill(0) };
+    ballots.forEach(b => {
+        vc.total++;
+        if (b.status === 'valid') vc.valid++;
+        else if (b.status === 'invalid') vc.invalid++;
+        else if (b.status === 'none') vc.none++;
+
+        if (b.status === 'valid' || b.status === 'none') {
+            for (let i = 0; i < totalCandidates; i++) {
+                if (!b.crossedOut.includes(i + 1)) {
+                    vc.perCandidate[i]++;
+                }
+            }
+        }
+    });
+    return vc;
+}
+
+function renderResultsForFilter(level) {
+    const data = appData[level];
+    const select = document.getElementById(`stack-filter-${level}`);
+    const filterVal = select ? select.value : 'all';
+
+    let vc;
+    let filterLabel = '';
+
+    if (filterVal === 'all') {
+        if (!data._voteCounts) rebuildVoteCounts(level);
+        vc = data._voteCounts;
+        filterLabel = '';
+    } else {
+        const stackIdx = parseInt(filterVal);
+        const stack = data.stacks[stackIdx];
+        if (!stack) return;
+        vc = calculateVotesForBallots(stack.ballots, data.totalCandidates);
+        filterLabel = ` — ${stack.name}`;
+    }
+
     const countable = vc.valid + vc.none;
 
     document.getElementById(`stats-grid-${level}`).innerHTML = `
-        <div class="stat-card total"><div class="stat-value">${vc.total}</div><div class="stat-label">Tổng số phiếu</div></div>
+        <div class="stat-card total"><div class="stat-value">${vc.total}</div><div class="stat-label">Tổng số phiếu${filterLabel}</div></div>
         <div class="stat-card valid"><div class="stat-value">${countable}</div><div class="stat-label">Phiếu hợp lệ</div></div>
         <div class="stat-card invalid"><div class="stat-value">${vc.invalid}</div><div class="stat-label">Phiếu không hợp lệ</div></div>
         <div class="stat-card nomark"><div class="stat-value">${vc.none}</div><div class="stat-label">Bầu đủ (không gạch)</div></div>
@@ -620,7 +680,9 @@ function updateResultsFromCache(level) {
     const maxVotes = Math.max(...vc.perCandidate, 1);
 
     const electedStt = new Set();
-    sorted.slice(0, data.electCount).forEach(c => { if (c.votes > 0) electedStt.add(c.stt); });
+    if (filterVal === 'all') {
+        sorted.slice(0, data.electCount).forEach(c => { if (c.votes > 0) electedStt.add(c.stt); });
+    }
 
     const tbody = document.querySelector(`#results-table-${level} tbody`);
     tbody.innerHTML = '';
@@ -638,6 +700,11 @@ function updateResultsFromCache(level) {
         fragment.appendChild(tr);
     });
     tbody.appendChild(fragment);
+}
+
+function updateResultsFromCache(level) {
+    updateStackFilterOptions(level);
+    renderResultsForFilter(level);
 }
 
 // ============ EXPORT CSV ============

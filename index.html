@@ -136,6 +136,9 @@
                 <div class="results-header">
                     <h2>📊 Kết quả kiểm phiếu — Quốc Hội</h2>
                     <div class="results-actions">
+                        <select class="stack-filter" id="stack-filter-quochoi" onchange="filterResultsByStack('quochoi')">
+                            <option value="all">📦 Tất cả xấp</option>
+                        </select>
                         <button class="btn btn-sm btn-outline" onclick="exportCSV('quochoi')">📥 Xuất CSV</button>
                         <button class="btn btn-sm btn-outline" onclick="printResults('quochoi')">🖨️ In kết quả</button>
                     </div>
@@ -245,6 +248,9 @@
                 <div class="results-header">
                     <h2>📊 Kết quả kiểm phiếu — HĐND Tỉnh/TP</h2>
                     <div class="results-actions">
+                        <select class="stack-filter" id="stack-filter-tinh" onchange="filterResultsByStack('tinh')">
+                            <option value="all">📦 Tất cả xấp</option>
+                        </select>
                         <button class="btn btn-sm btn-outline" onclick="exportCSV('tinh')">📥 Xuất CSV</button>
                         <button class="btn btn-sm btn-outline" onclick="printResults('tinh')">🖨️ In kết quả</button>
                     </div>
@@ -352,6 +358,9 @@
                 <div class="results-header">
                     <h2>📊 Kết quả kiểm phiếu — HĐND Phường/Xã</h2>
                     <div class="results-actions">
+                        <select class="stack-filter" id="stack-filter-phuong" onchange="filterResultsByStack('phuong')">
+                            <option value="all">📦 Tất cả xấp</option>
+                        </select>
                         <button class="btn btn-sm btn-outline" onclick="exportCSV('phuong')">📥 Xuất CSV</button>
                         <button class="btn btn-sm btn-outline" onclick="printResults('phuong')">🖨️ In kết quả</button>
                     </div>

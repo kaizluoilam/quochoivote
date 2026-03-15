@@ -904,3 +904,33 @@ body {
     .main-content { padding: 16px; }
     .results-header { flex-direction: column; align-items: flex-start; }
 }
+
+/* ============ STACK FILTER ============ */
+.stack-filter {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e0e0e0;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+    min-width: 160px;
+}
+
+.stack-filter:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.stack-filter:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.2);
+}
+
+.stack-filter option {
+    background: #1a1a2e;
+    color: #e0e0e0;
+}
